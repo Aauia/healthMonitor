@@ -66,17 +66,20 @@ This methodology ensures that the user receives a balanced view of their wellnes
 
 ### Use-Case Diagram
 ```mermaid
-useCaseDiagram
-    actor User
-    actor AISystem as "AI Health Coach"
+flowchart LR
+    User((User))
+    AI((AI Health Coach))
     
-    User --> (Log Health Data)
-    User --> (Manage Supplements)
-    User --> (View Dashboard)
-    (Log Health Data) ..> (Calculate Health Score) : include
-    AISystem --> (Analyze Trends)
-    (Analyze Trends) ..> (Generate Recommendations) : include
-    User --> (Read Recommendations)
+    User --> Log(Log Health Data)
+    User --> Manage(Manage Supplements)
+    User --> View(View Dashboard)
+    
+    Log -.-> Score(Calculate Health Score)
+    
+    AI --> Analyze(Analyze Trends)
+    Analyze -.-> Recs(Generate Recommendations)
+    
+    User --> Read(Read Recommendations)
 ```
 
 ### Sequence Diagram: Recommendation Generation
@@ -142,24 +145,54 @@ erDiagram
     USERS ||--o{ ACTIVITY_LOGS : logs
     USERS ||--o{ SUPPLEMENTS : manages
     USERS ||--o{ RECOMMENDATIONS : receives
+    SUPPLEMENTS ||--o{ SUPPLEMENT_LOGS : records
     
     USERS {
         int id PK
         string email UK
         string full_name
+        string password
         int steps_goal
+        float sleep_goal_hours
     }
     SLEEP_SESSIONS {
         int id PK
         int user_id FK
         date sleep_date
+        time bedtime
+        time wake_time
         int duration_min
+    }
+    ACTIVITY_LOGS {
+        int id PK
+        int user_id FK
+        date log_date
+        int steps
+        int active_minutes
+        int calories_burned
+    }
+    SUPPLEMENTS {
+        int id PK
+        int user_id FK
+        string name
+        string dosage
+        string frequency
+        boolean is_active
+    }
+    SUPPLEMENT_LOGS {
+        int id PK
+        int supplement_id FK
+        date log_date
+        string planned_time
+        boolean taken
     }
     RECOMMENDATIONS {
         int id PK
         int user_id FK
         string category
         text message
+        string trigger_metric
         boolean is_read
+        datetime created_at
     }
 ```
