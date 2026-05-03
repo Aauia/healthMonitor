@@ -2,14 +2,14 @@ import Foundation
 
 struct Recommendation: Codable, Identifiable {
     var id: Int?
-    var type: String?
-    var content: String
+    var category: String?
+    var message: String
     var createdAt: String?
     
     enum CodingKeys: String, CodingKey {
         case id
-        case type
-        case content
+        case category
+        case message
         case createdAt = "created_at"
     }
 }

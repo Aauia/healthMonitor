@@ -78,6 +78,15 @@ struct LoginView: View {
                     Text("Don't have an account? **Register**")
                         .foregroundColor(.hmPrimary)
                 }
+                
+                Button(action: {
+                    appState.isOnboardingCompleted = false
+                }) {
+                    Text("View Tutorial")
+                        .font(.caption)
+                        .foregroundColor(.gray)
+                        .padding(.top, 8)
+                }
                 .padding(.bottom, 20)
             }
             .background(Color.hmBackground.edgesIgnoringSafeArea(.all))

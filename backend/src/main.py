@@ -14,6 +14,7 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from src.database import engine, get_db, Base
 from src import models
 from src import schemas
+from src.ai_service import ai_service
 
 # Создаём таблицы
 Base.metadata.create_all(bind=engine)
@@ -346,47 +347,65 @@ def generate_recommendations(
     current_user: dict = Depends(get_current_user)
 ):
     user_id = int(current_user["sub"])
+    user = db.query(models.User).filter(models.User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    # Fetch recent data for AI analysis
+    last_week = date.today() - timedelta(days=7)
+    
+    sleep_history = db.query(models.SleepSession).filter(
+        models.SleepSession.user_id == user_id,
+        models.SleepSession.sleep_date >= last_week
+    ).all()
+
+    activity_history = db.query(models.ActivityLog).filter(
+        models.ActivityLog.user_id == user_id,
+        models.ActivityLog.log_date >= last_week
+    ).all()
+
+    supplements = db.query(models.Supplement).filter(
+        models.Supplement.user_id == user_id,
+        models.Supplement.is_active == True
+    ).all()
+
+    # Prepare data for AI
+    user_data = {
+        "user_name": user.full_name,
+        "goals": {
+            "steps_goal": user.steps_goal,
+            "sleep_goal_hours": user.sleep_goal_hours
+        },
+        "sleep_history": sleep_history,
+        "activity_history": activity_history,
+        "supplements": supplements
+    }
+
+    # Generate AI insights
+    ai_insights = ai_service.generate_health_insights(user_data)
 
     recs = []
+    for insight in ai_insights:
+        recs.append(models.Recommendation(
+            user_id=user_id,
+            category=insight.get("category", "general"),
+            message=insight.get("message", "Stay healthy!"),
+            trigger_metric="ai_generated",
+            trigger_value=0.0
+        ))
 
-    # --- сон ---
-    sleep = db.query(models.SleepSession).filter(
-        models.SleepSession.user_id == user_id
-    ).order_by(models.SleepSession.sleep_date.desc()).limit(7).all()
+    if recs:
+        db.add_all(recs)
+        db.commit()
 
-    if sleep:
-        avg_sleep = sum(s.duration_min for s in sleep if s.duration_min) / len(sleep)
-        
-        if avg_sleep < 360:
-            recs.append(models.Recommendation(
-                user_id=user_id,
-                category="sleep",
-                message="You sleep less than 6 hours. Try to increase sleep duration.",
-                trigger_metric="sleep",
-                trigger_value=avg_sleep
-            ))
-
-    # --- активность ---
-    activity = db.query(models.ActivityLog).filter(
-        models.ActivityLog.user_id == user_id
-    ).order_by(models.ActivityLog.log_date.desc()).limit(7).all()
-
-    if activity:
-        avg_steps = sum(a.steps for a in activity) / len(activity)
-
-        if avg_steps < 5000:
-            recs.append(models.Recommendation(
-                user_id=user_id,
-                category="activity",
-                message="Low activity level. Try to walk more.",
-                trigger_metric="steps",
-                trigger_value=avg_steps
-            ))
-
-    db.add_all(recs)
-    db.commit()
-
-    return {"generated": len(recs)}
+    # Return the first recommendation to satisfy the frontend's expected response type
+    # (The frontend expects a single Recommendation object based on RecommendationsViewModel.swift)
+    if recs:
+        # We need to refresh to get the ID and other fields
+        db.refresh(recs[0])
+        return recs[0]
+    
+    return {"status": "no new insights"}
 
 @app.get("/recommendations/my")
 def get_recommendations(

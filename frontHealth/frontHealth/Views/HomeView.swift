@@ -101,7 +101,7 @@ struct HomeView: View {
             Text(greeting)
                 .font(.system(size: 16))
                 .foregroundColor(.gray)
-            Text(user.firstName ?? "user")
+            Text(viewModel.user?.fullName.split(separator: " ").first.map(String.init) ?? "user")
                 .font(.system(size: 32, weight: .bold))
                 .foregroundColor(.primary)
         }
@@ -318,7 +318,7 @@ struct HomeView: View {
 
     private var recommendationsList: some View {
         ForEach(Array(viewModel.recommendations.enumerated()), id: \.offset) { index, rec in
-            recommendationRow(index: index, message: rec.content)
+            recommendationRow(index: index, message: rec.message)
         }
     }
 

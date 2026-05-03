@@ -4,7 +4,7 @@ struct RecommendationCard: View {
     var recommendation: Recommendation
     
     private var iconForType: String {
-        switch recommendation.type?.lowercased() {
+        switch recommendation.category?.lowercased() {
         case "sleep": return "moon.zzz.fill"
         case "activity": return "figure.walk"
         case "supplement", "nutrition": return "pills.fill"
@@ -26,13 +26,13 @@ struct RecommendationCard: View {
             }
             
             VStack(alignment: .leading, spacing: 4) {
-                if let type = recommendation.type {
-                    Text(type.capitalized)
+                if let category = recommendation.category {
+                    Text(category.capitalized)
                         .font(.caption)
                         .fontWeight(.semibold)
                         .foregroundColor(.hmPrimary)
                 }
-                Text(recommendation.content)
+                Text(recommendation.message)
                     .font(.subheadline)
                     .foregroundColor(.hmText)
                     .lineLimit(3)

@@ -20,7 +20,6 @@ struct OnboardingView: View {
                 }
                 .padding()
                 .foregroundColor(.hmPrimary)
-                .opacity(currentTab == screens.count - 1 ? 0 : 1)
             }
             
             TabView(selection: $currentTab) {
@@ -69,7 +68,16 @@ struct OnboardingView: View {
                     .cornerRadius(16)
             }
             .padding(.horizontal, 40)
-            .padding(.bottom, 40)
+            
+            Button(action: {
+                appState.isOnboardingCompleted = true
+            }) {
+                Text("Already have an account? **Log In**")
+                    .font(.subheadline)
+                    .foregroundColor(.hmPrimary)
+                    .padding(.top, 12)
+            }
+            .padding(.bottom, 20)
         }
         .background(Color.hmBackground.edgesIgnoringSafeArea(.all))
     }

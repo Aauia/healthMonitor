@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr, field_validator
+from pydantic import BaseModel, EmailStr, field_validator, model_validator
 from typing import Optional, List
 from datetime import datetime, date, time
 from enum import Enum
@@ -239,6 +239,14 @@ class RecommendationOut(BaseModel):
     trigger_value:  Optional[float] = None
     is_read:        bool
     created_at:     datetime
+
+    @model_validator(mode="after")
+    def sync_frontend_fields(self) -> "RecommendationOut":
+        if self.type is None:
+            self.type = self.category
+        if self.content is None:
+            self.content = self.message
+        return self
 
     class Config:
         from_attributes = True

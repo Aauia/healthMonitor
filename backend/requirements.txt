@@ -16,5 +16,4 @@ httpx
 torch
 torchvision
 supabase
-groq
 yt-dlp

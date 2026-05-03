@@ -20,7 +20,7 @@ enum APIError: Error, LocalizedError {
 
 class APIService {
     static let shared = APIService()
-    private let baseURL = "http://127.0.0.1:8086"
+    private let baseURL = "http://127.0.0.1:8080"
     
     private init() {}
     
