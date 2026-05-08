@@ -6,7 +6,7 @@
 - **User Authentication**: Secure sign-up/login with encrypted password storage and JWT session management.
 - **Health Data Logging**: Manual and automated entry for sleep sessions, daily step counts, and active minutes.
 - **Supplement Management**: CRUD operations for supplement lists with timed notification scheduling.
-- **AI Recommendation Engine**: Automated generation of personalized wellness advice based on 7-day historical trends.
+- **AI Recommendation Engine**: Automated generation of personalized wellness advice based on historical trends.
 - **Unified Dashboard**: Real-time aggregation of all health metrics into a single "Health Score" for immediate progress assessment.
 
 ### Non-Functional Requirements
